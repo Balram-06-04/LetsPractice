@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Form</title>
+    <style>
+        /* Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #f0f0f0, #dcdcdc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .container {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .container h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="file"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        input[type="file"] {
+            background: #fafafa;
+        }
+
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background-color: #43a047;
+        }
+
+        #userBox {
+            height: 100%;
+            width: 90%;
+            border-radius: 20px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            /* justify-content: center;
+            align-items: center; */
+        }
+
+        .user {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            height: 300px;
+            width: 300px;
+            background-color: #e6e6e6;
+            padding: 10px;
+
+        }
+
+        .user .userImg {
+            height: 250px;
+            width: 100%;
+            overflow: hidden;
+            /* ensures no overflow of image */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+
+        }
+
+        .user .userImg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>User Information</h2>
+        <form id="userForm">
+            <div>
+                <label for="name">Name</label>
+                <input type="text" id="name" required>
+            </div>
+            <div>
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div>
+                <label for="password">Password</label>
+                <input type="password" id="password" required>
+            </div>
+            <div>
+                <label for="img">Image</label>
+                <input type="file" id="image" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div id="userBox">
+        <!-- user data gos here -->
+    </div>
+    <!-- <div id="userBox">
+        <div class="user">
+            <div class="userImg">
+                <img src="IMG_20230609_192933.jpg" alt="">
+            </div>
+            <div class="UserName">
+                <p>UserName</p>
+            </div>
+        </div>
+    </div> -->
+    <script>
+        document.getElementById('userForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const data = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                image: document.getElementById('image').value
+            };
+
+            await fetch('/submit', {
+                method: 'POST',
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            });
+
+            this.reset();
+            loadUsers(); // refresh users list
+        });
+
+        async function loadUsers() {
+            const res = await fetch("/getAllUsers");
+            const users = await res.json();
+
+            const allUser = document.getElementById("userBox");
+            // allUser.innerHTML = "<h2>Hello Dosto</h2>";
+
+            users.forEach(u => {
+                allUser.innerHTML += `
+        <div class="user">
+            <div class="userImg">
+                <img src="${u.image}" alt="img" width="100">
+            </div>
+            <div class="UserName">
+                <p>${u.name}</p>
+            </div>
+        </div>`;
+            });
+        }
+
+        loadUsers();
+
+
+    </script>
+</body>
+
+</html>
