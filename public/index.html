@@ -81,14 +81,16 @@
         }
 
         #userBox {
+            margin: auto 0;
             height: 100%;
             width: 90%;
             border-radius: 20px;
-            padding: 10px;
+            padding: 30px;
             display: flex;
             flex-wrap: wrap;
-            /* justify-content: center;
-            align-items: center; */
+            justify-content: center;
+            align-items: center;
+            gap: 30px;
         }
 
         .user {
@@ -96,11 +98,17 @@
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
-            height: 300px;
-            width: 300px;
+            height: 250px;
+            width: 250px;
             background-color: #e6e6e6;
             padding: 10px;
 
+        }
+
+        @media (max-width:800px) {
+            .user {
+                width: 300px;
+            }
         }
 
         .user .userImg {
@@ -127,25 +135,22 @@
 <body>
     <div class="container">
         <h2>User Information</h2>
-        <form id="userForm">
-            <div>
-                <label for="name">Name</label>
-                <input type="text" id="name" required>
-            </div>
-            <div>
-                <label for="email">Email</label>
-                <input type="email" id="email" required>
-            </div>
-            <div>
-                <label for="password">Password</label>
-                <input type="password" id="password" required>
-            </div>
-            <div>
-                <label for="img">Image</label>
-                <input type="file" id="image" required>
-            </div>
+        <form id="userForm" enctype="multipart/form-data">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required>
+
+            <label for="image">Image</label>
+            <input type="file" id="image" name="image" required>
+
             <button type="submit">Submit</button>
         </form>
+
     </div>
     <div id="userBox">
         <!-- user data gos here -->
@@ -164,22 +169,17 @@
         document.getElementById('userForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            const data = {
-                name: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                password: document.getElementById('password').value,
-                image: document.getElementById('image').value
-            };
+            const formData = new FormData(this);
 
             await fetch('/submit', {
                 method: 'POST',
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data)
+                body: formData
             });
 
             this.reset();
-            loadUsers(); // refresh users list
+            loadUsers();
         });
+
 
         async function loadUsers() {
             const res = await fetch("/getAllUsers");
@@ -187,12 +187,13 @@
 
             const allUser = document.getElementById("userBox");
             // allUser.innerHTML = "<h2>Hello Dosto</h2>";
+            allUser.innerHTML = ""; // Clear previous content
 
             users.forEach(u => {
                 allUser.innerHTML += `
         <div class="user">
             <div class="userImg">
-                <img src="${u.image}" alt="img" width="100">
+                <img src="${u.image}" alt="img">
             </div>
             <div class="UserName">
                 <p>${u.name}</p>
