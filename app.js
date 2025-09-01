@@ -6,6 +6,8 @@ const path = require("path");
 const User = require("./userModel");
 const mongoose = require("mongoose");
 const multer = require("multer");
+const cloudinary = require("./cloudinary");
+const fs = require("fs");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -16,23 +18,15 @@ mongoose.connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
-    .then(() => console.log("✅ MongoDB Connected"))
-    .catch(err => console.error("❌ MongoDB connection error:", err));
+.then(() => console.log("✅ MongoDB Connected"))
+.catch(err => console.error("❌ MongoDB connection error:", err));
 
-// Multer config (store images in public/uploads/)
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "public/uploads/");
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // unique name
-    }
-});
-const upload = multer({ storage });
+// Multer config (temporary local storage, just for upload)
+const upload = multer({ dest: "uploads/" });
 
 // Routes
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, "public/index.html"));
+    res.sendFile(path.join(__dirname, "public"));
 });
 
 app.get("/getAllUsers", async (req, res) => {
@@ -46,13 +40,27 @@ app.get("/getAllUsers", async (req, res) => {
 
 app.post("/submit", upload.single("image"), async (req, res) => {
     const { name, email, password } = req.body;
-    const imagePath = req.file ? `/uploads/${req.file.filename}` : "";
 
     try {
-        const newUser = new User({ name, email, password, image: imagePath });
+        // Upload image to Cloudinary
+        const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: "users", // optional Cloudinary folder
+        });
+
+        // Delete temp file
+        fs.unlinkSync(req.file.path);
+
+        // Save user with Cloudinary URL
+        const newUser = new User({
+            name,
+            email,
+            password,
+            image: result.secure_url,
+        });
+
         await newUser.save();
         res.json(newUser);
-        // res.json({ message: "User data saved successfully!" });
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Error saving data" });
@@ -60,5 +68,5 @@ app.post("/submit", upload.single("image"), async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log("Server Upp.....");
+    console.log(`🚀 Server running on port ${PORT}`);
 });
