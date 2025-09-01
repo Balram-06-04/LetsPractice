@@ -60,5 +60,5 @@ app.post("/submit", upload.single("image"), async (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log("Server Upp....");
+    console.log("Server Upp.....");
 });
