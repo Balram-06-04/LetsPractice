@@ -171,12 +171,12 @@
 
             const formData = new FormData(this);
 
+            this.reset();
             await fetch('/submit', {
                 method: 'POST',
                 body: formData
             });
 
-            this.reset();
             loadUsers();
         });
 
